@@ -1,19 +1,29 @@
-import random
+import pathlib
+
+current_dir = pathlib.Path(__file__).parent
 
 
-def get_numbers_ticket(min_val, max_val, quantity):
-    if min_val < 1 or max_val > 1000 or quantity < 1 or quantity > (max_val - min_val + 1):
+def get_cats_info(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as file:
+            cats_info = []
+            for line in file:
+                cat_id, name, age = line.strip().split(',')
+                cats_info.append({"id": cat_id, "name": name, "age": age})
+        return cats_info
+    except FileNotFoundError:
+        print(f"Файл за шляхом {path} не знайдено.")
+        return []
+    except Exception as e:
+        print(f"Сталася помилка: {e}")
         return []
 
-    numbers = random.sample(range(min_val, max_val + 1), quantity)
-    numbers.sort()
 
-    return numbers
+def main():
+    path_to_file = current_dir / "cats_file.txt"
+    cats_info = get_cats_info(path_to_file)
+    print(cats_info)
 
 
-print(get_numbers_ticket(1, 49, 6))
-print(get_numbers_ticket(1, 36, 5))
-print(get_numbers_ticket(10, 20, 15))
-print(get_numbers_ticket(1, 49, 50))
-print(get_numbers_ticket(0, 49, 5))
-print(get_numbers_ticket(1, 1001, 5))
+if __name__ == "__main__":
+    main()
