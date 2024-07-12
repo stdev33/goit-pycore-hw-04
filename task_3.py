@@ -1,29 +1,36 @@
-import re
+import sys
+import pathlib
+from colorama import init, Fore, Style
 
 
-def normalize_phone(phone_number):
-    phone_number = re.sub(r"[^\d+]", '', phone_number)
-
-    if not phone_number.startswith("+"):
-        if phone_number.startswith("380"):
-            phone_number = "+" + phone_number
-        else:
-            phone_number = "+38" + phone_number
-
-    return phone_number
+init(autoreset=True)
 
 
-raw_numbers = [
-    "067\\t123 4567",
-    "(095) 234-5678\\n",
-    "+380 44 123 4567",
-    "380501234567",
-    "    +38(050)123-32-34",
-    "     0503451234",
-    "(050)8889900",
-    "38050-111-22-22",
-    "38050 111 22 11   ",
-]
+def print_directory_structure(path, indent=""):
+    try:
+        base_path = pathlib.Path(path)
 
-sanitized_numbers = [normalize_phone(num) for num in raw_numbers]
-print("Нормалізовані номери телефонів для SMS-розсилки:", sanitized_numbers)
+        if not base_path.exists():
+            print(f"Шлях {path} не існує.")
+            return
+        if not base_path.is_dir():
+            print(f"Шлях {path} не є директорією.")
+            return
+
+        for item in base_path.iterdir():
+            if item.is_dir():
+                print(f"{indent}{Fore.BLUE}{Style.BRIGHT}{item.name}{Style.RESET_ALL}")
+                print_directory_structure(item, indent + "  ")
+            else:
+                print(f"{indent}{Fore.GREEN}{item.name}")
+
+    except Exception as e:
+        print(f"Сталася помилка: {e}")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Використання: python task_3.py /шлях/до/директорії")
+    else:
+        directory_path = sys.argv[1]
+        print_directory_structure(directory_path)
