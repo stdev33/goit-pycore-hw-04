@@ -1,36 +1,29 @@
-from datetime import datetime, timedelta
+import bot.actions as actions
+import bot.helpers as helpers
 
 
-def get_upcoming_birthdays(users):
-    today = datetime.today().date()
-    end_date = today + timedelta(days=7)
+def main():
+    contacts = {}
+    print("Welcome to the assistant bot!")
 
-    upcoming_birthdays = []
+    command_handlers = {
+        "hello": lambda args: actions.hello(),
+        "add": lambda args: actions.add_contact(args, contacts),
+        "change": lambda args: actions.change_contact(args, contacts),
+        "phone": lambda args: actions.show_phone(args, contacts),
+        "all": lambda args: actions.show_all(contacts),
+        "exit": lambda args: actions.exit_bot(),
+        "close": lambda args: actions.exit_bot(),
+    }
 
-    for user in users:
-        birthday = datetime.strptime(user["birthday"], "%Y.%m.%d").date()
+    while True:
+        user_input = input("Enter a command: ")
+        command, args = helpers.parse_input(user_input)
 
-        birthday_this_year = birthday.replace(year=today.year)
+        handler = command_handlers.get(command, lambda args: helpers.invalid_command())
+        result = handler(args)
+        if result:
+            print(result)
 
-        if birthday_this_year < today:
-            birthday_this_year = birthday_this_year.replace(year=today.year + 1)
-
-        if today <= birthday_this_year <= end_date:
-            if birthday_this_year.weekday() >= 5:
-                birthday_this_year += timedelta(days=(7 - birthday_this_year.weekday()))
-
-            upcoming_birthdays.append(
-                dict(name=user["name"], congratulation_date=birthday_this_year.strftime("%Y.%m.%d")))
-
-    return upcoming_birthdays
-
-
-users_birthdays = [
-    {"name": "Alice", "birthday": "1990.07.01"},
-    {"name": "Bob", "birthday": "1985.07.04"},
-    {"name": "Charlie", "birthday": "1992.07.06"},
-    {"name": "David", "birthday": "1980.07.08"},
-    {"name": "Eve", "birthday": "1995.07.10"},
-]
-
-print("Список привітань на цьому тижні:", get_upcoming_birthdays(users_birthdays))
+if __name__ == "__main__":
+    main()
